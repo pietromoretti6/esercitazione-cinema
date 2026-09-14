@@ -72,6 +72,16 @@ h1 em { color: var(--accent); font-style: italic; }
 .hero-copy { max-width: 390px; color: var(--muted); font: 1.05rem/1.6 Arial, sans-serif; }
 .catalog { padding-bottom: 7rem; border-top: 1px solid var(--line); padding-top: 1.5rem; }
 h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 400; }
+.selected-film { color: var(--accent); font: .8rem Arial, sans-serif; }
+.selected-film-poster { display: block; width: 160px; margin: 1.5rem 0; }
+.screenings-title { margin: 2.5rem 0 .75rem; font-size: 1.5rem; font-weight: 400; }
+#screenings-list { display: grid; gap: .75rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+#screenings-list li { padding: .9rem 1rem; border: 1px solid var(--line); color: var(--muted); font: .85rem Arial, sans-serif; }
+#films-list { display: grid; gap: 1rem; margin: 2rem 0 0; padding: 0; list-style: none; }
+#films-list li { display: flex; align-items: center; gap: 1.25rem; padding: 1rem; border: 1px solid var(--line); color: var(--muted); font: .85rem Arial, sans-serif; }
+#films-list a { color: inherit; }
+#films-list a:hover { color: var(--accent); }
+.film-poster { width: 72px; height: 108px; flex: 0 0 auto; object-fit: cover; }
 footer { padding-block: 1.5rem 2.5rem; border-top: 1px solid var(--line); }
 
 @media (max-width: 480px) {
