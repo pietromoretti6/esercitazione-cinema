@@ -170,6 +170,8 @@ async function loadScreenings() {
         <strong>${screening.available_seats} posti disponibili</strong>
       `
       screeningItem.addEventListener('click', () => {
+        if (screening.available_seats === 0) return
+
         document.querySelector('.booking-form')?.remove()
 
         const bookingForm = document.createElement('form')
@@ -180,8 +182,51 @@ async function loadScreenings() {
           <label>Cognome<input name="last_name" type="text" required /></label>
           <label>Email<input name="email" type="email" required /></label>
           <button type="submit">Continua</button>
+          <p class="booking-status" aria-live="polite"></p>
         `
-        bookingForm.addEventListener('submit', (event) => event.preventDefault())
+        bookingForm.addEventListener('submit', async (event) => {
+          event.preventDefault()
+
+          const submitButton = bookingForm.querySelector<HTMLButtonElement>('button')!
+          const status = bookingForm.querySelector<HTMLParagraphElement>('.booking-status')!
+          const formData = new FormData(bookingForm)
+          const bookingData = {
+            first_name: String(formData.get('first_name')),
+            last_name: String(formData.get('last_name')),
+            email: String(formData.get('email')),
+          }
+
+          submitButton.disabled = true
+          submitButton.textContent = 'Invio...'
+
+          try {
+            const response = await fetch(`https://its-cinema.vercel.app/api/screenings/${screening.id}/bookings`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(bookingData),
+            })
+
+            const result = await response.json() as { error?: string; details?: Record<string, string> }
+            if (!response.ok) {
+              const details = result.details ? ` ${Object.values(result.details).join(' ')}` : ''
+              throw new Error(`${result.error ?? 'Prenotazione non riuscita'}.${details}`)
+            }
+
+            status.textContent = 'Prenotazione confermata.'
+            bookingForm.reset()
+            screening.available_seats -= 1
+            const seatsLabel = screeningItem.querySelector('strong')!
+            seatsLabel.textContent = `${screening.available_seats} posti disponibili`
+            if (screening.available_seats === 0) {
+              screeningItem.classList.add('screening-sold-out')
+            }
+          } catch (error) {
+            status.textContent = error instanceof Error ? error.message : 'Prenotazione non riuscita.'
+          } finally {
+            submitButton.disabled = false
+            submitButton.textContent = 'Continua'
+          }
+        })
         screeningItem.after(bookingForm)
       })
       screeningsList.append(screeningItem)
