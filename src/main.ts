@@ -13,7 +13,9 @@ type Film = {
 }
 
 type Screening = {
+  id: number
   starts_at: string
+  available_seats: number
   hall: {
     name: string
   }
@@ -161,7 +163,27 @@ async function loadScreenings() {
 
     screenings.forEach((screening) => {
       const screeningItem = document.createElement('li')
-      screeningItem.textContent = `${new Date(screening.starts_at).toLocaleString('it-IT')} · ${screening.hall.name}`
+      screeningItem.className = 'screening-item'
+      screeningItem.dataset.screeningId = String(screening.id)
+      screeningItem.innerHTML = `
+        <span>${new Date(screening.starts_at).toLocaleString('it-IT')} · ${screening.hall.name}</span>
+        <strong>${screening.available_seats} posti disponibili</strong>
+      `
+      screeningItem.addEventListener('click', () => {
+        document.querySelector('.booking-form')?.remove()
+
+        const bookingForm = document.createElement('form')
+        bookingForm.className = 'booking-form'
+        bookingForm.innerHTML = `
+          <h3>Prenota per questo spettacolo</h3>
+          <label>Nome<input name="first_name" type="text" required /></label>
+          <label>Cognome<input name="last_name" type="text" required /></label>
+          <label>Email<input name="email" type="email" required /></label>
+          <button type="submit">Continua</button>
+        `
+        bookingForm.addEventListener('submit', (event) => event.preventDefault())
+        screeningItem.after(bookingForm)
+      })
       screeningsList.append(screeningItem)
     })
   } catch {

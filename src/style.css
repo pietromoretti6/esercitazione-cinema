@@ -84,7 +84,14 @@ h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 400; }
 .film-description { max-width: 600px; margin: 2rem 0 0; color: var(--muted); font: 1rem/1.7 Arial, sans-serif; }
 .screenings-title { margin: 2.5rem 0 .75rem; font-size: 1.5rem; font-weight: 400; }
 #screenings-list { display: grid; gap: .75rem; margin: 1rem 0 0; padding: 0; list-style: none; }
-#screenings-list li { padding: .9rem 1rem; border: 1px solid var(--line); color: var(--muted); font: .85rem Arial, sans-serif; }
+#screenings-list li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 1rem; border: 1px solid var(--line); color: var(--muted); font: .85rem Arial, sans-serif; cursor: pointer; }
+#screenings-list li:hover { border-color: var(--accent); }
+#screenings-list strong { color: var(--accent); font-weight: 400; white-space: nowrap; }
+.booking-form { display: grid; gap: 1rem; margin: 1rem 0 1.5rem; padding: 1.5rem; border: 1px solid var(--accent); }
+.booking-form h3 { margin: 0 0 .5rem; }
+.booking-form label { display: grid; gap: .4rem; color: var(--muted); font: .75rem Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+.booking-form input { width: 100%; padding: .75rem; border: 1px solid var(--line); color: var(--paper); background: transparent; font: 1rem Arial, sans-serif; }
+.booking-form button { justify-self: start; padding: .75rem 1.25rem; border: 0; color: var(--ink); background: var(--accent); cursor: pointer; font: .75rem Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 #films-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(1.25rem, 2.5vw, 2.5rem); margin: 2rem 0 0; padding: 0; list-style: none; }
 .poster-link { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: #292a29; }
 .film-poster { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .5s ease; }
