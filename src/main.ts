@@ -18,6 +18,7 @@ type Screening = {
   available_seats: number
   hall: {
     name: string
+    capacity: number
   }
 }
 
@@ -136,7 +137,7 @@ async function loadSelectedFilm() {
 
     const film = await response.json() as Film
     document.querySelector<HTMLHeadingElement>('#detail-title')!.textContent = film.title
-    selectedFilm.textContent = `${film.year} · ${film.duration} min · Regia di ${film.director}`
+  selectedFilm.textContent = `${film.genre} · ${film.year} · ${film.duration} min · ${film.rating} · Regia di ${film.director}`
     if (film.poster_url) {
       selectedFilmPoster.src = film.poster_url
       selectedFilmPoster.alt = `Locandina di ${film.title}`
@@ -166,8 +167,14 @@ async function loadScreenings() {
       screeningItem.className = 'screening-item'
       screeningItem.dataset.screeningId = String(screening.id)
       screeningItem.innerHTML = `
-        <span>${new Date(screening.starts_at).toLocaleString('it-IT')} · ${screening.hall.name}</span>
-        <strong>${screening.available_seats} posti disponibili</strong>
+        <div class="screening-main">
+          <strong>${new Date(screening.starts_at).toLocaleString('it-IT')}</strong>
+          <span>${screening.hall.name}</span>
+        </div>
+        <div class="screening-seats">
+          <span>${screening.hall.capacity - screening.available_seats} prenotati</span>
+          <strong>${screening.available_seats} disponibili</strong>
+        </div>
       `
       screeningItem.addEventListener('click', () => {
         if (screening.available_seats === 0) return
@@ -181,7 +188,7 @@ async function loadScreenings() {
           <label>Nome<input name="first_name" type="text" required /></label>
           <label>Cognome<input name="last_name" type="text" required /></label>
           <label>Email<input name="email" type="email" required /></label>
-          <button type="submit">Continua</button>
+          <button type="submit">Prenota posto</button>
           <p class="booking-status" aria-live="polite"></p>
         `
         bookingForm.addEventListener('submit', async (event) => {
@@ -215,8 +222,10 @@ async function loadScreenings() {
             status.textContent = 'Prenotazione confermata.'
             bookingForm.reset()
             screening.available_seats -= 1
-            const seatsLabel = screeningItem.querySelector('strong')!
-            seatsLabel.textContent = `${screening.available_seats} posti disponibili`
+            const seatsLabel = screeningItem.querySelector('.screening-seats strong')!
+            const bookedLabel = screeningItem.querySelector('.screening-seats span')!
+            seatsLabel.textContent = `${screening.available_seats} disponibili`
+            bookedLabel.textContent = `${screening.hall.capacity - screening.available_seats} prenotati`
             if (screening.available_seats === 0) {
               screeningItem.classList.add('screening-sold-out')
             }
@@ -224,7 +233,7 @@ async function loadScreenings() {
             status.textContent = error instanceof Error ? error.message : 'Prenotazione non riuscita.'
           } finally {
             submitButton.disabled = false
-            submitButton.textContent = 'Continua'
+            submitButton.textContent = 'Prenota posto'
           }
         })
         screeningItem.after(bookingForm)

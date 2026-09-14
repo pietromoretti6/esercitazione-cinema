@@ -72,7 +72,7 @@ h1 em { color: var(--accent); font-style: italic; }
 .hero-copy { max-width: 390px; color: var(--muted); font: 1.05rem/1.6 Arial, sans-serif; }
 .catalog { padding-bottom: 7rem; border-top: 1px solid var(--line); padding-top: 1.5rem; }
 h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 400; }
-.selected-film { color: var(--accent); font: .8rem Arial, sans-serif; }
+.selected-film { color: var(--accent); font: .78rem/1.6 Arial, sans-serif; letter-spacing: .04em; text-transform: uppercase; }
 .selected-film-poster { display: block; width: 160px; margin: 1.5rem 0; }
 .detail { padding: clamp(3rem, 8vw, 6rem) 0 7rem; }
 .back-link { display: inline-block; margin-bottom: 3rem; color: var(--muted); font: .75rem Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
@@ -84,9 +84,12 @@ h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 400; }
 .film-description { max-width: 600px; margin: 2rem 0 0; color: var(--muted); font: 1rem/1.7 Arial, sans-serif; }
 .screenings-title { margin: 2.5rem 0 .75rem; font-size: 1.5rem; font-weight: 400; }
 #screenings-list { display: grid; gap: .75rem; margin: 1rem 0 0; padding: 0; list-style: none; }
-#screenings-list li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 1rem; border: 1px solid var(--line); color: var(--muted); font: .85rem Arial, sans-serif; cursor: pointer; }
+#screenings-list li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; border: 1px solid var(--line); color: var(--muted); font: .85rem Arial, sans-serif; cursor: pointer; }
 #screenings-list li:hover { border-color: var(--accent); }
-#screenings-list strong { color: var(--accent); font-weight: 400; white-space: nowrap; }
+.screening-main { display: grid; gap: .35rem; }
+.screening-main strong { color: var(--paper); font-weight: 400; }
+.screening-seats { display: grid; gap: .35rem; text-align: right; white-space: nowrap; }
+.screening-seats strong { color: var(--accent); font-weight: 400; }
 #screenings-list .screening-sold-out { cursor: default; opacity: .55; }
 #screenings-list .screening-sold-out strong { color: #f08b72; }
 .booking-form { display: grid; gap: 1rem; margin: 1rem 0 1.5rem; padding: 1.5rem; border: 1px solid var(--accent); }
