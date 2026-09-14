@@ -74,6 +74,14 @@ h1 em { color: var(--accent); font-style: italic; }
 h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 400; }
 .selected-film { color: var(--accent); font: .8rem Arial, sans-serif; }
 .selected-film-poster { display: block; width: 160px; margin: 1.5rem 0; }
+.detail { padding: clamp(3rem, 8vw, 6rem) 0 7rem; }
+.back-link { display: inline-block; margin-bottom: 3rem; color: var(--muted); font: .75rem Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.back-link:hover { color: var(--accent); }
+.detail-layout { display: grid; grid-template-columns: minmax(220px, 320px) minmax(0, 680px); gap: clamp(2rem, 7vw, 7rem); align-items: start; }
+.detail-poster-wrap { background: #292a29; }
+.detail-poster-wrap .selected-film-poster { width: 100%; margin: 0; aspect-ratio: 2 / 3; object-fit: cover; }
+.detail-copy h1 { margin-bottom: 1rem; font-size: clamp(3rem, 7vw, 6rem); }
+.film-description { max-width: 600px; margin: 2rem 0 0; color: var(--muted); font: 1rem/1.7 Arial, sans-serif; }
 .screenings-title { margin: 2.5rem 0 .75rem; font-size: 1.5rem; font-weight: 400; }
 #screenings-list { display: grid; gap: .75rem; margin: 1rem 0 0; padding: 0; list-style: none; }
 #screenings-list li { padding: .9rem 1rem; border: 1px solid var(--line); color: var(--muted); font: .85rem Arial, sans-serif; }
@@ -94,6 +102,7 @@ footer { padding-block: 1.5rem 2.5rem; border-top: 1px solid var(--line); }
 
 @media (max-width: 850px) {
   #films-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail-layout { grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); gap: 2rem; }
 }
 
 @media (max-width: 480px) {
@@ -103,4 +112,6 @@ footer { padding-block: 1.5rem 2.5rem; border-top: 1px solid var(--line); }
   h1 { font-size: 3.1rem; }
   #films-list { gap: 1rem; }
   h3 { font-size: 1.2rem; }
+  .detail-layout { display: block; }
+  .detail-poster-wrap { max-width: 240px; margin-bottom: 2.5rem; }
 }

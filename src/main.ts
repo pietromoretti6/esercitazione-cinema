@@ -22,6 +22,39 @@ type Screening = {
 const app = document.querySelector<HTMLDivElement>('#app')!
 const selectedFilmId = new URLSearchParams(window.location.search).get('id')
 
+const pageContent = selectedFilmId ? `
+  <section class="detail" aria-labelledby="detail-title">
+    <a class="back-link" href="./">← Torna alla programmazione</a>
+    <div class="detail-layout">
+      <div class="detail-poster-wrap">
+        <img class="selected-film-poster" id="selected-film-poster" alt="" hidden />
+      </div>
+      <div class="detail-copy">
+        <p class="eyebrow">Scheda film</p>
+        <h1 id="detail-title">Caricamento...</h1>
+        <p class="selected-film" id="selected-film"></p>
+        <p class="film-description" id="film-description"></p>
+        <h2 class="screenings-title">Spettacoli</h2>
+        <p id="screenings-status">Caricamento degli spettacoli...</p>
+        <ul id="screenings-list"></ul>
+      </div>
+    </div>
+  </section>
+` : `
+  <section class="hero">
+    <p class="eyebrow">In programmazione</p>
+    <h1>Storie da vedere<br /><em>sul grande schermo.</em></h1>
+    <p class="hero-copy">Scopri i film in sala e trova il tuo prossimo spettacolo.</p>
+  </section>
+
+  <section class="catalog" aria-labelledby="catalog-title">
+    <p class="eyebrow">La selezione di oggi</p>
+    <h2 id="catalog-title">I film in programmazione</h2>
+    <p id="films-status">Caricamento dei film...</p>
+    <ul id="films-list"></ul>
+  </section>
+`
+
 app.innerHTML = `
   <header class="site-header">
     <a class="brand" href="./" aria-label="CineMondo home">
@@ -30,30 +63,13 @@ app.innerHTML = `
     </a>
     <span class="header-label">Multisala · Programmazione</span>
   </header>
-
-  <main>
-    <section class="hero">
-      <p class="eyebrow">In programmazione</p>
-      <h1>Storie da vedere<br /><em>sul grande schermo.</em></h1>
-      <p class="hero-copy">Scopri i film in sala e trova il tuo prossimo spettacolo.</p>
-    </section>
-
-    <section class="catalog" aria-labelledby="catalog-title">
-      <p class="eyebrow">La selezione di oggi</p>
-      <h2 id="catalog-title">I film in programmazione</h2>
-      ${selectedFilmId ? '<p class="selected-film" id="selected-film">Caricamento del film selezionato...</p>' : ''}
-      ${selectedFilmId ? '<img class="selected-film-poster" id="selected-film-poster" alt="" hidden />' : ''}
-      ${selectedFilmId ? '<p class="film-description" id="film-description"></p>' : ''}
-      ${selectedFilmId ? '<h3 class="screenings-title">Spettacoli</h3><p id="screenings-status">Caricamento degli spettacoli...</p><ul id="screenings-list"></ul>' : ''}
-      <p id="films-status">Caricamento dei film...</p>
-      <ul id="films-list"></ul>
-    </section>
-  </main>
-
+  <main>${pageContent}</main>
   <footer>Il cinema è il modo più diretto per entrare in un altro mondo.</footer>
 `
 
 async function loadFilms() {
+  if (selectedFilmId) return
+
   const status = document.querySelector<HTMLParagraphElement>('#films-status')!
   const filmsList = document.querySelector<HTMLUListElement>('#films-list')!
 
@@ -117,7 +133,8 @@ async function loadSelectedFilm() {
     if (!response.ok) throw new Error('Film non trovato')
 
     const film = await response.json() as Film
-    selectedFilm.textContent = `Film selezionato: ${film.title} · ${film.year} · ${film.duration} min · Regia di ${film.director}`
+    document.querySelector<HTMLHeadingElement>('#detail-title')!.textContent = film.title
+    selectedFilm.textContent = `${film.year} · ${film.duration} min · Regia di ${film.director}`
     if (film.poster_url) {
       selectedFilmPoster.src = film.poster_url
       selectedFilmPoster.alt = `Locandina di ${film.title}`
