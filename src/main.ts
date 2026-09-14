@@ -66,20 +66,38 @@ async function loadFilms() {
 
     films.forEach((film) => {
       const filmItem = document.createElement('li')
+      filmItem.className = 'film-card'
+
+      const posterLink = document.createElement('a')
+      posterLink.className = 'poster-link'
+      posterLink.href = `?id=${film.id}`
+      posterLink.setAttribute('aria-label', `Scopri di più su ${film.title}`)
 
       if (film.poster_url) {
         const poster = document.createElement('img')
         poster.className = 'film-poster'
         poster.src = film.poster_url
         poster.alt = `Locandina di ${film.title}`
-        poster.width = 120
-        filmItem.prepend(poster)
+        poster.loading = 'lazy'
+        posterLink.append(poster)
       }
 
-      const filmLink = document.createElement('a')
-      filmLink.href = `?id=${film.id}`
-      filmLink.textContent = `${film.title} · ${film.genre} · ${film.year} · ${film.duration} min · ${film.rating}`
-      filmItem.append(filmLink)
+      const arrow = document.createElement('span')
+      arrow.className = 'card-arrow'
+      arrow.textContent = '↗'
+      arrow.setAttribute('aria-hidden', 'true')
+      posterLink.append(arrow)
+
+      const filmInfo = document.createElement('div')
+      filmInfo.className = 'film-info'
+      filmInfo.innerHTML = `
+        <div class="film-meta"><span>${film.genre}</span><span>${film.year}</span></div>
+        <h3>${film.title}</h3>
+        <p>${film.duration} min · ${film.rating}</p>
+        <a class="discover-link" href="?id=${film.id}">Scopri di più <span aria-hidden="true">→</span></a>
+      `
+
+      filmItem.append(posterLink, filmInfo)
       filmsList.append(filmItem)
     })
   } catch {
