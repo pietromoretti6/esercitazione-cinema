@@ -2,6 +2,8 @@ import './style.css'
 
 type Film = {
   title: string
+  genre: string
+  year: number
 }
 
 const app = document.querySelector<HTMLDivElement>('#app')!
@@ -46,7 +48,7 @@ async function loadFilms() {
 
     films.forEach((film) => {
       const filmItem = document.createElement('li')
-      filmItem.textContent = film.title
+      filmItem.textContent = `${film.title} · ${film.genre} · ${film.year}`
       filmsList.append(filmItem)
     })
   } catch {
