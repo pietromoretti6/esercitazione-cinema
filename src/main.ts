@@ -1,74 +1,12 @@
 import './style.css'
-
-type Film = {
-  id: number
-  title: string
-  genre: string
-  director: string
-  description: string
-  year: number
-  duration: number
-  rating: string
-  poster_url: string | null
-}
-
-type Screening = {
-  id: number
-  starts_at: string
-  available_seats: number
-  hall: {
-    name: string
-    capacity: number
-  }
-}
+import { createBooking, getFilm, getFilms, getScreenings } from './api'
+import { createBookingForm, createFilmCard, createScreeningItem, renderPage } from './ui'
+import type { Screening } from './types'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 const selectedFilmId = new URLSearchParams(window.location.search).get('id')
 
-const pageContent = selectedFilmId ? `
-  <section class="detail" aria-labelledby="detail-title">
-    <a class="back-link" href="./">← Torna alla programmazione</a>
-    <div class="detail-layout">
-      <div class="detail-poster-wrap">
-        <img class="selected-film-poster" id="selected-film-poster" alt="" hidden />
-      </div>
-      <div class="detail-copy">
-        <p class="eyebrow">Scheda film</p>
-        <h1 id="detail-title">Caricamento...</h1>
-        <p class="selected-film" id="selected-film"></p>
-        <p class="film-description" id="film-description"></p>
-        <h2 class="screenings-title">Spettacoli</h2>
-        <p id="screenings-status">Caricamento degli spettacoli...</p>
-        <ul id="screenings-list"></ul>
-      </div>
-    </div>
-  </section>
-` : `
-  <section class="hero">
-    <p class="eyebrow">In programmazione</p>
-    <h1>Storie da vedere<br /><em>sul grande schermo.</em></h1>
-    <p class="hero-copy">Scopri i film in sala e trova il tuo prossimo spettacolo.</p>
-  </section>
-
-  <section class="catalog" aria-labelledby="catalog-title">
-    <p class="eyebrow">La selezione di oggi</p>
-    <h2 id="catalog-title">I film in programmazione</h2>
-    <p id="films-status">Caricamento dei film...</p>
-    <ul id="films-list"></ul>
-  </section>
-`
-
-app.innerHTML = `
-  <header class="site-header">
-    <a class="brand" href="./" aria-label="CineMondo home">
-      <span class="brand-mark">CM</span>
-      <span>CineMondo</span>
-    </a>
-    <span class="header-label">Multisala · Programmazione</span>
-  </header>
-  <main>${pageContent}</main>
-  <footer>Il cinema è il modo più diretto per entrare in un altro mondo.</footer>
-`
+renderPage(app, selectedFilmId)
 
 async function loadFilms() {
   if (selectedFilmId) return
@@ -77,48 +15,9 @@ async function loadFilms() {
   const filmsList = document.querySelector<HTMLUListElement>('#films-list')!
 
   try {
-    const response = await fetch('https://its-cinema.vercel.app/api/films')
-    if (!response.ok) throw new Error('Impossibile caricare i film')
-
-    const films = await response.json() as Film[]
+    const films = await getFilms()
     status.textContent = ''
-
-    films.forEach((film) => {
-      const filmItem = document.createElement('li')
-      filmItem.className = 'film-card'
-
-      const posterLink = document.createElement('a')
-      posterLink.className = 'poster-link'
-      posterLink.href = `?id=${film.id}`
-      posterLink.setAttribute('aria-label', `Scopri di più su ${film.title}`)
-
-      if (film.poster_url) {
-        const poster = document.createElement('img')
-        poster.className = 'film-poster'
-        poster.src = film.poster_url
-        poster.alt = `Locandina di ${film.title}`
-        poster.loading = 'lazy'
-        posterLink.append(poster)
-      }
-
-      const arrow = document.createElement('span')
-      arrow.className = 'card-arrow'
-      arrow.textContent = '↗'
-      arrow.setAttribute('aria-hidden', 'true')
-      posterLink.append(arrow)
-
-      const filmInfo = document.createElement('div')
-      filmInfo.className = 'film-info'
-      filmInfo.innerHTML = `
-        <div class="film-meta"><span>${film.genre}</span><span>${film.year}</span></div>
-        <h3>${film.title}</h3>
-        <p>${film.duration} min · ${film.rating}</p>
-        <a class="discover-link" href="?id=${film.id}">Scopri di più <span aria-hidden="true">→</span></a>
-      `
-
-      filmItem.append(posterLink, filmInfo)
-      filmsList.append(filmItem)
-    })
+    films.forEach((film) => filmsList.append(createFilmCard(film)))
   } catch {
     status.textContent = 'La programmazione non è momentaneamente disponibile.'
   }
@@ -132,12 +31,9 @@ async function loadSelectedFilm() {
   const filmDescription = document.querySelector<HTMLParagraphElement>('#film-description')!
 
   try {
-    const response = await fetch(`https://its-cinema.vercel.app/api/films/${selectedFilmId}`)
-    if (!response.ok) throw new Error('Film non trovato')
-
-    const film = await response.json() as Film
+    const film = await getFilm(selectedFilmId)
     document.querySelector<HTMLHeadingElement>('#detail-title')!.textContent = film.title
-  selectedFilm.textContent = `${film.genre} · ${film.year} · ${film.duration} min · ${film.rating} · Regia di ${film.director}`
+    selectedFilm.textContent = `${film.genre} · ${film.year} · ${film.duration} min · ${film.rating} · Regia di ${film.director}`
     if (film.poster_url) {
       selectedFilmPoster.src = film.poster_url
       selectedFilmPoster.alt = `Locandina di ${film.title}`
@@ -149,6 +45,39 @@ async function loadSelectedFilm() {
   }
 }
 
+async function submitBooking(event: SubmitEvent, form: HTMLFormElement, screening: Screening, screeningItem: HTMLLIElement) {
+  event.preventDefault()
+
+  const submitButton = form.querySelector<HTMLButtonElement>('button')!
+  const status = form.querySelector<HTMLParagraphElement>('.booking-status')!
+  const formData = new FormData(form)
+  const bookingData = {
+    first_name: String(formData.get('first_name')),
+    last_name: String(formData.get('last_name')),
+    email: String(formData.get('email')),
+  }
+
+  submitButton.disabled = true
+  submitButton.textContent = 'Invio...'
+
+  try {
+    const result = await createBooking(screening.id, bookingData)
+    status.textContent = result.id
+      ? `Prenotazione confermata. Codice: ${result.id}`
+      : 'Prenotazione confermata.'
+    form.reset()
+    screening.available_seats -= 1
+    screeningItem.querySelector('.screening-seats strong')!.textContent = `${screening.available_seats} disponibili`
+    screeningItem.querySelector('.screening-seats span')!.textContent = `${screening.hall.capacity - screening.available_seats} prenotati`
+    if (screening.available_seats === 0) screeningItem.classList.add('screening-sold-out')
+  } catch (error) {
+    status.textContent = error instanceof Error ? error.message : 'Prenotazione non riuscita.'
+  } finally {
+    submitButton.disabled = false
+    submitButton.textContent = 'Prenota posto'
+  }
+}
+
 async function loadScreenings() {
   if (!selectedFilmId) return
 
@@ -156,85 +85,20 @@ async function loadScreenings() {
   const screeningsList = document.querySelector<HTMLUListElement>('#screenings-list')!
 
   try {
-    const response = await fetch(`https://its-cinema.vercel.app/api/films/${selectedFilmId}/screenings`)
-    if (!response.ok) throw new Error('Spettacoli non trovati')
-
-    const screenings = await response.json() as Screening[]
+    const screenings = await getScreenings(selectedFilmId)
+    if (screenings.length === 0) {
+      status.textContent = 'Non ci sono spettacoli disponibili per questo film.'
+      return
+    }
     status.textContent = ''
 
     screenings.forEach((screening) => {
-      const screeningItem = document.createElement('li')
-      screeningItem.className = 'screening-item'
-      screeningItem.dataset.screeningId = String(screening.id)
-      screeningItem.innerHTML = `
-        <div class="screening-main">
-          <strong>${new Date(screening.starts_at).toLocaleString('it-IT')}</strong>
-          <span>${screening.hall.name}</span>
-        </div>
-        <div class="screening-seats">
-          <span>${screening.hall.capacity - screening.available_seats} prenotati</span>
-          <strong>${screening.available_seats} disponibili</strong>
-        </div>
-      `
+      const screeningItem = createScreeningItem(screening)
       screeningItem.addEventListener('click', () => {
         if (screening.available_seats === 0) return
-
         document.querySelector('.booking-form')?.remove()
-
-        const bookingForm = document.createElement('form')
-        bookingForm.className = 'booking-form'
-        bookingForm.innerHTML = `
-          <h3>Prenota per questo spettacolo</h3>
-          <label>Nome<input name="first_name" type="text" required /></label>
-          <label>Cognome<input name="last_name" type="text" required /></label>
-          <label>Email<input name="email" type="email" required /></label>
-          <button type="submit">Prenota posto</button>
-          <p class="booking-status" aria-live="polite"></p>
-        `
-        bookingForm.addEventListener('submit', async (event) => {
-          event.preventDefault()
-
-          const submitButton = bookingForm.querySelector<HTMLButtonElement>('button')!
-          const status = bookingForm.querySelector<HTMLParagraphElement>('.booking-status')!
-          const formData = new FormData(bookingForm)
-          const bookingData = {
-            first_name: String(formData.get('first_name')),
-            last_name: String(formData.get('last_name')),
-            email: String(formData.get('email')),
-          }
-
-          submitButton.disabled = true
-          submitButton.textContent = 'Invio...'
-
-          try {
-            const response = await fetch(`https://its-cinema.vercel.app/api/screenings/${screening.id}/bookings`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(bookingData),
-            })
-
-            const result = await response.json() as { error?: string; details?: Record<string, string> }
-            if (!response.ok) {
-              const details = result.details ? ` ${Object.values(result.details).join(' ')}` : ''
-              throw new Error(`${result.error ?? 'Prenotazione non riuscita'}.${details}`)
-            }
-
-            status.textContent = 'Prenotazione confermata.'
-            bookingForm.reset()
-            screening.available_seats -= 1
-            const seatsLabel = screeningItem.querySelector('.screening-seats strong')!
-            const bookedLabel = screeningItem.querySelector('.screening-seats span')!
-            seatsLabel.textContent = `${screening.available_seats} disponibili`
-            bookedLabel.textContent = `${screening.hall.capacity - screening.available_seats} prenotati`
-            if (screening.available_seats === 0) {
-              screeningItem.classList.add('screening-sold-out')
-            }
-          } catch (error) {
-            status.textContent = error instanceof Error ? error.message : 'Prenotazione non riuscita.'
-          } finally {
-            submitButton.disabled = false
-            submitButton.textContent = 'Prenota posto'
-          }
+        const bookingForm = createBookingForm((event, form) => {
+          void submitBooking(event, form, screening, screeningItem)
         })
         screeningItem.after(bookingForm)
       })
