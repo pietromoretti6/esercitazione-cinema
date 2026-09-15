@@ -36,7 +36,7 @@ export function renderPage(app: HTMLDivElement, selectedFilmId: string | null) {
   app.innerHTML = `
     <header class="site-header">
       <a class="brand" href="./" aria-label="Multisala Brodo home">
-        <span class="brand-mark">CM</span>
+        <img class="brand-logo" src="/logo-multisala-brodo.svg" alt="" />
         <span>Multisala Brodo</span>
       </a>
       <span class="header-label">Multisala · Programmazione</span>
